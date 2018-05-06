@@ -1,13 +1,12 @@
 /* 
  * CS:APP Data Lab 
  * 
- * <Please put your name and userid here>
+ * Stuart
  * 
  * bits.c - Source file with your solutions to the Lab.
  *          This is the file you will hand in to your instructor.
  *
  * WARNING: Do not include the <stdio.h> header; it confuses the dlc
- * compiler. You can still use printf for debugging without including
  * <stdio.h>, although you might get a compiler warning. In general,
  * it's not good practice to ignore compiler warnings, but in this
  * case it's OK.  
@@ -139,7 +138,7 @@ NOTES:
  *   Rating: 1
  */
 int bitAnd(int x, int y) {
-  return 2;
+  return ~(~x | ~y);
 }
 /* 
  * getByte - Extract byte n from word x
@@ -150,15 +149,14 @@ int bitAnd(int x, int y) {
  *   Rating: 2
  */
 int getByte(int x, int n) {
+  int n_bytes = n << 3;
+  int whole_byte = 0xff;
+  int mask = whole_byte << n_bytes;
+  int isolated = x & mask;
+  int truncated = isolated >> n_bytes;
+  int last_byte_mask = 0x000000ff;
 
-
-
-
-
-
-
-  return 2;
-
+  return truncated & last_byte_mask;
 }
 /* 
  * logicalShift - shift x to the right by n, using a logical shift
@@ -169,7 +167,12 @@ int getByte(int x, int n) {
  *   Rating: 3 
  */
 int logicalShift(int x, int n) {
-  return 2;
+  int shifted = x >> n;
+  int leftmost_one = 0x1 << 31;
+  int n_minus_one_ones = (leftmost_one >> n) << 1;
+  int mask = ~n_minus_one_ones;
+
+  return shifted & mask;
 }
 /*
  * bitCount - returns count of number of 1's in word
