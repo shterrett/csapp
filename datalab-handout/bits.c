@@ -205,7 +205,20 @@ int bitCount(int x) {
  *   Rating: 4 
  */
 int bang(int x) {
-  return 2;
+  int two_bits = 0x55555555;
+  int four_bits = 0x33333333;
+  int eight_bits = 0x0f0f0f0f;
+  int sixteen_bits = 0x00ff00ff;
+  int thirty_two_bits = 0x0000ffff;
+
+  int present = x;
+  present = (present & two_bits) | ((present >> 1) & two_bits);
+  present = (present & four_bits) | ((present >> 2) & four_bits);
+  present = (present & eight_bits) | ((present >> 4) & eight_bits);
+  present = (present & sixteen_bits) | ((present >> 8) & sixteen_bits);
+  present = (present & thirty_two_bits) | ((present >> 16) & thirty_two_bits);
+
+  return present ^ 0x1;
 }
 /* 
  * tmin - return minimum two's complement integer 
