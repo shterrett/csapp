@@ -239,7 +239,11 @@ int tmin(void) {
  *   Rating: 2
  */
 int fitsBits(int x, int n) {
-  return 2;
+  int negative_one = ~0;
+  int sign_bit = 0x1 << 31 & x;
+  int extended_sign_bit = sign_bit >> 31 << (n + negative_one);
+  int mask_n_bits = ~0 << (n + negative_one);
+  return !((x & mask_n_bits) ^ extended_sign_bit);
 }
 /* 
  * divpwr2 - Compute x/(2^n), for 0 <= n <= 30
