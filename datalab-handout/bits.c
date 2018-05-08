@@ -182,18 +182,18 @@ int logicalShift(int x, int n) {
  *   Rating: 4
  */
 int bitCount(int x) {
-  int two_bits = 0x55555555;
-  int four_bits = 0x33333333;
-  int eight_bits = 0x0f0f0f0f;
-  int sixteen_bits = 0x00ff00ff;
-  int thirty_two_bits = 0x0000ffff;
+  int two_bits = (0x55 << 24) + (0x55 << 16) + (0x55 << 8) + 0x55;
+  int four_bits = (0x33 << 24) + (0x33 << 16) + (0x33 << 8) + 0x33;
+  int eight_bits = (0x0f << 24) + (0x0f << 16) + (0x0f << 8) + 0x0f;
+  int sixteen_bits = (0xff << 16) + 0xff;
+  int thirty_two_bits = (0xff << 8) + 0xff;
 
   int count = x;
   count = (count & two_bits) + ((count >> 1) & two_bits);
   count = (count & four_bits) + ((count >> 2) & four_bits);
-  count = (count & eight_bits) + ((count >> 4) & eight_bits);
-  count = (count & sixteen_bits) + ((count >> 8) & sixteen_bits);
-  count = (count & thirty_two_bits) + ((count >> 16) & thirty_two_bits);
+  count = (count + (count >> 4)) & eight_bits;
+  count = (count + (count >> 8)) & sixteen_bits;
+  count = (count + (count >> 16)) & thirty_two_bits;
 
   return count;
 }
