@@ -248,7 +248,12 @@ int fitsBits(int x, int n) {
  *   Rating: 2
  */
 int divpwr2(int x, int n) {
-    return 2;
+  int negative_one = ~0;
+  int odd_mask = (0x1 << n) + negative_one;
+  int odd = !!(odd_mask & x);
+  int negative = (x >> 31) & 0x1;
+  int round_up = odd & negative & (!!n);
+  return (x >> n) + round_up;
 }
 /* 
  * negate - return -x 
