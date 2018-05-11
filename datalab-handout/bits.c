@@ -285,7 +285,17 @@ int isPositive(int x) {
  *   Rating: 3
  */
 int isLessOrEqual(int x, int y) {
-  return 2;
+  int sign_bit = 1 << 31;
+  int xor = x ^ y;
+  int equal = !xor;
+  int different_signs = !!(xor & sign_bit);
+  int x_less_than_zero = !!(x & sign_bit);
+  int x_minus_y = x + (~y + 1);
+  int difference_less_than_zero = !!(x_minus_y & sign_bit);
+
+  return equal |
+         (!different_signs & difference_less_than_zero) |
+         (different_signs & x_less_than_zero);
 }
 /*
  * ilog2 - return floor(log base 2 of x), where x > 0
