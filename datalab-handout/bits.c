@@ -366,7 +366,13 @@ int ilog2(int x) {
  *   Rating: 2
  */
 unsigned float_neg(unsigned uf) {
- return 2;
+  int exponent_mask = 0xff << 23;
+  int fraction_mask = (0x1 << 23) - 1;
+  if (((exponent_mask & uf) == exponent_mask) && (fraction_mask & uf)) {
+    return uf;
+  } else {
+    return uf ^ (0x1 << 31);
+  }
 }
 /* 
  * float_i2f - Return bit-level equivalent of expression (float) x
