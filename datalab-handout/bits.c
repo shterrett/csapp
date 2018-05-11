@@ -305,7 +305,54 @@ int isLessOrEqual(int x, int y) {
  *   Rating: 4
  */
 int ilog2(int x) {
-  return 2;
+  int negative_one = ~0;
+  int take_sixteen = (0xff << 8) + 0xff;
+  int take_eight = 0xff;
+  int take_four = 0xf;
+  int take_two = 0x3;
+  int take_one = 0x1;
+
+
+  int working_bits = x;
+  int top_half = (working_bits >> 16) & take_sixteen;
+  int bottom_half = working_bits & take_sixteen;
+  int top_mask = !top_half + negative_one;
+  int bottom_mask = ~top_mask;
+  int base = base + (top_mask & 0x10);
+  working_bits = (top_half & top_mask) | (bottom_half & bottom_mask);
+
+
+  top_half = (working_bits >> 8) & take_eight;
+  bottom_half = working_bits & take_eight;
+  top_mask = !top_half + negative_one;
+  bottom_mask = ~top_mask;
+  base = base + (top_mask & 0x8);
+  working_bits = (top_half & top_mask) | (bottom_half & bottom_mask);
+
+
+  top_half = (working_bits >> 4) & take_four;
+  bottom_half = working_bits & take_four;
+  top_mask = !top_half + negative_one;
+  bottom_mask = ~top_mask;
+  base = base + (top_mask & 0x4);
+  working_bits = (top_half & top_mask) | (bottom_half & bottom_mask);
+
+
+  top_half = (working_bits >> 2) & take_two;
+  bottom_half = working_bits & take_two;
+  top_mask = !top_half + negative_one;
+  bottom_mask = ~top_mask;
+  base = base + (top_mask & 0x2);
+  working_bits = (top_half & top_mask) | (bottom_half & bottom_mask);
+
+
+  top_half = (working_bits >> 1) & take_one;
+  bottom_half = working_bits & take_one;
+  top_mask = !top_half + negative_one;
+  base = base + (top_mask & 0x1);
+  working_bits = (top_half & top_mask) | (bottom_half & bottom_mask);
+
+  return base;
 }
 /* 
  * float_neg - Return bit-level equivalent of expression -f for
