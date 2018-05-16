@@ -447,5 +447,22 @@ unsigned float_i2f(int x) {
  *   Rating: 4
  */
 unsigned float_twice(unsigned uf) {
-  return 2;
+  int exponent_mask = 0xff << 23;
+  int fraction_mask = (0x1 << 23) - 1;
+  int exponent = exponent_mask & uf;
+
+  if (exponent == exponent_mask) {
+    return uf;
+  }
+  if (uf == 0x0) {
+    return uf;
+  }
+  if (uf == 0x80000000) {
+    return uf;
+  }
+
+  if (exponent == 0 && (uf & fraction_mask) < (fraction_mask + 1)) {
+    return (uf & ~fraction_mask) | ((uf & fraction_mask) * 2);
+  }
+  return uf + (0x1 << 23);
 }
