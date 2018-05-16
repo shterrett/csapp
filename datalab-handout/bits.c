@@ -384,7 +384,56 @@ unsigned float_neg(unsigned uf) {
  *   Rating: 4
  */
 unsigned float_i2f(int x) {
-  return 2;
+  int sign_bit = 0x80000000;
+
+  if (x == 0) {
+    return 0x0;
+  } else if (x == sign_bit) {
+    return 0xcf000000;
+  }
+
+  int sign, abs, exp, frac;
+  int truncated_bits, pad, num_digits, mask, first_truncated_bit;
+  sign = x & sign_bit;
+  abs = sign? -x : x;
+  frac = abs;
+  exp = 0;
+  truncated_bits = 0;
+  pad = 0;
+
+  while (abs >>= 1) {
+      exp ++;
+  }
+
+  num_digits = exp - 23;
+
+  if (exp > 23) {
+      mask = ~(sign_bit >> (31 - num_digits));
+      truncated_bits = frac & mask;
+      first_truncated_bit = 0x1 << (num_digits - 1);
+      if (truncated_bits == first_truncated_bit) {
+        if (frac >> num_digits & 0x1) {
+              pad = 1;
+        }
+      } else {
+          pad = truncated_bits > first_truncated_bit;
+      }
+
+      frac = (frac >> num_digits) + pad;
+
+      if (frac & 0x01000000) {
+          exp++;
+      }
+  }
+  else {
+      frac = frac << (-num_digits);
+  }
+
+  frac = frac & 0x7fffff; /* set the sign and exponent bits to zero */ 
+
+  exp += 127; /* add the bias to the exp */
+
+  return sign | (exp << 23) | frac;
 }
 /* 
  * float_twice - Return bit-level equivalent of expression 2*f for
