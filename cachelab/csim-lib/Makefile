@@ -6,7 +6,7 @@ CC = gcc
 CFLAGS = -g -Wall -Werror -std=c99 -m64
 
 csim: csim.c cachelab.c cachelab.h
-	$(CC) $(CFLAGS) -o bin/csim csim.c cachelab.c libcsim.h libcsim.c -lm 
+	$(CC) $(CFLAGS) -o bin/csim csim.c cachelab.c libcsim.h libcsim.c -lm
 
 test:
 	cc -std=c99 -Wall -g test.c minunit.h dbg.h libcsim.h libcsim.c -o bin/test
