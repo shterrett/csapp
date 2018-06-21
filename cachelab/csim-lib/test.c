@@ -12,12 +12,10 @@ char *test_help(void) {
   char *argv[] = { "bin/csim", "-h" };
 
   int verbose = 0;
-  int set_idx_bits = 0;
-  int lines_per_set = 0;
-  int block_bits = 0;
+  cache_config_t *config = malloc(sizeof(cache_config_t));
   char* trace_file = malloc(sizeof(char) * 32);
 
-  int help = init(argc, argv, &verbose, &set_idx_bits, &lines_per_set, &block_bits, trace_file);
+  int help = init(argc, argv, &verbose, config, trace_file);
 
   mu_assert(help == 1, "Did not set help bit");
 
@@ -29,12 +27,10 @@ char *test_verbose(void) {
   char *argv[] = { "bin/csim", "-v" };
 
   int verbose = 0;
-  int set_idx_bits = 0;
-  int lines_per_set = 0;
-  int block_bits = 0;
+  cache_config_t *config = malloc(sizeof(cache_config_t));
   char* trace_file = malloc(sizeof(char) * 32);
 
-  init(argc, argv, &verbose, &set_idx_bits, &lines_per_set, &block_bits, trace_file);
+  init(argc, argv, &verbose, config, trace_file);
 
   mu_assert(verbose == 1, "Did not set verbose bit");
 
@@ -46,12 +42,10 @@ char *test_no_help_or_verbose(void) {
   char *argv[] = { "bin/csim" };
 
   int verbose = 0;
-  int set_idx_bits = 0;
-  int lines_per_set = 0;
-  int block_bits = 0;
+  cache_config_t *config = malloc(sizeof(cache_config_t));
   char* trace_file = malloc(sizeof(char) * 32);
 
-  int help = init(argc, argv, &verbose, &set_idx_bits, &lines_per_set, &block_bits, trace_file);
+  int help = init(argc, argv, &verbose, config, trace_file);
 
   mu_assert(help == 0, "Inappropriately set help bit");
   mu_assert(verbose == 0, "Inappropriately set verbose bit");
@@ -64,16 +58,14 @@ char *test_initializes_variables(void) {
   char *argv[] = {"bin/csim", "-s", "5", "-E", "7", "-b", "9", "-t", "tracefile.txt"};
 
   int verbose = 0;
-  int set_idx_bits = 0;
-  int lines_per_set = 0;
-  int block_bits = 0;
+  cache_config_t *config = malloc(sizeof(cache_config_t));
   char* trace_file = malloc(sizeof(char) * 32);
 
-  int required = init(argc, argv, &verbose, &set_idx_bits, &lines_per_set, &block_bits, trace_file);
+  int required = init(argc, argv, &verbose, config, trace_file);
 
-  mu_assert(set_idx_bits == 5, "Failed to set set_idx_bits");
-  mu_assert(lines_per_set == 7, "Failed to set lines_per_set");
-  mu_assert(block_bits == 9, "Failed to set block_bits");
+  mu_assert(config->set_idx_bits == 5, "Failed to set set_idx_bits");
+  mu_assert(config->lines_per_set == 7, "Failed to set lines_per_set");
+  mu_assert(config->block_bits == 9, "Failed to set block_bits");
   mu_assert(strcmp(trace_file, "tracefile.txt") == 0, "Failed to set trace_file");
   mu_assert(required == 8, "did not count args properly");
 
@@ -85,12 +77,10 @@ char *test_not_enough_variables(void) {
   char *argv[] = {"bin/csim", "-E", "7", "-b", "9", "-t", "tracefile.txt"};
 
   int verbose = 0;
-  int set_idx_bits = 0;
-  int lines_per_set = 0;
-  int block_bits = 0;
+  cache_config_t *config = malloc(sizeof(cache_config_t));
   char* trace_file = malloc(sizeof(char) * 32);
 
-  int required = init(argc, argv, &verbose, &set_idx_bits, &lines_per_set, &block_bits, trace_file);
+  int required = init(argc, argv, &verbose, config, trace_file);
 
   mu_assert(required == 6, "did not count args properly");
 
@@ -102,12 +92,10 @@ char *test_help_makes_arg_count_odd(void) {
   char *argv[] = {"bin/csim", "-s", "5", "-E", "7", "-b", "9", "-h", "-t", "tracefile.txt"};
 
   int verbose = 0;
-  int set_idx_bits = 0;
-  int lines_per_set = 0;
-  int block_bits = 0;
+  cache_config_t *config = malloc(sizeof(cache_config_t));
   char* trace_file = malloc(sizeof(char) * 32);
 
-  int required = init(argc, argv, &verbose, &set_idx_bits, &lines_per_set, &block_bits, trace_file);
+  int required = init(argc, argv, &verbose, config, trace_file);
 
   mu_assert(required == 9, "did not count args properly");
 

@@ -5,17 +5,13 @@
 
 int main(int argc, char** argv) {
   int verbose = 0;
-  int set_idx_bits = 0;
-  int lines_per_set = 0;
-  int block_bits = 0;
+  cache_config_t *config = malloc(sizeof(cache_config_t));
   char* trace_file = malloc(sizeof(char) * TRACE_FILE_NAME_LENGTH);
 
   int args = init(argc,
                   argv,
                   &verbose,
-                  &set_idx_bits,
-                  &lines_per_set,
-                  &block_bits,
+                  config,
                   trace_file
                  );
   if (args % 2) {
@@ -25,9 +21,9 @@ int main(int argc, char** argv) {
   } else {
     printf("initialized %d %d %d %d %s\n",
           verbose,
-          set_idx_bits,
-          lines_per_set,
-          block_bits,
+          config->set_idx_bits,
+          config->lines_per_set,
+          config->block_bits,
           trace_file
         );
   };
