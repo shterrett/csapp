@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 
 int TRACE_FILE_NAME_LENGTH;
 
@@ -18,4 +19,6 @@ int init(int argc,
         );
 void print_help(void);
 
-unsigned set_idx(unsigned addr, int n_set_bits);
+uint64_t extract_set_idx(cache_config_t *config, uint64_t addr);
+uint64_t extract_block_offset(cache_config_t *config, uint64_t addr);
+uint64_t extract_tag(cache_config_t *config, uint64_t addr);

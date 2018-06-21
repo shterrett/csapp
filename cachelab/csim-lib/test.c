@@ -103,6 +103,46 @@ char *test_help_makes_arg_count_odd(void) {
 }
 
 char *test_extracts_set_bits_from_address(void) {
+  uint64_t addr = 0x0000000000180000;
+  cache_config_t *config = malloc(sizeof(cache_config_t));
+  config->set_idx_bits = 32;
+  config->lines_per_set = 1;
+  config->block_bits = 16;
+
+  uint64_t set_idx = extract_set_idx(config, addr);
+
+  printf("Extracted Index: 0x%08lx\n", set_idx);
+  mu_assert(set_idx == 24, "extracted wrong set bits");
+
+  return NULL;
+}
+
+char *test_extracts_block_offset(void) {
+  uint64_t addr = 0x1111111111110008;
+  cache_config_t *config = malloc(sizeof(cache_config_t));
+  config->set_idx_bits = 32;
+  config->lines_per_set = 1;
+  config->block_bits = 16;
+
+  uint64_t block_offset = extract_block_offset(config, addr);
+
+  mu_assert(block_offset == 8, "extracted wrong block offset");
+
+  return NULL;
+}
+
+char *test_extracts_tag_bits(void) {
+  uint64_t addr = 0x0008111111111111;
+  cache_config_t *config = malloc(sizeof(cache_config_t));
+  config->set_idx_bits = 32;
+  config->lines_per_set = 1;
+  config->block_bits = 16;
+
+  uint64_t tag = extract_tag(config, addr);
+
+  mu_assert(tag == 8, "extracted wrong tag");
+
+  return NULL;
 }
 
 char *all_tests(void) {
@@ -114,6 +154,9 @@ char *all_tests(void) {
   mu_run_test(test_initializes_variables);
   mu_run_test(test_not_enough_variables);
   mu_run_test(test_help_makes_arg_count_odd);
+  mu_run_test(test_extracts_set_bits_from_address);
+  mu_run_test(test_extracts_block_offset);
+  mu_run_test(test_extracts_tag_bits);
 
   return NULL;
 }
