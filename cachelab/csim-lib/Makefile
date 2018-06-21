@@ -12,7 +12,7 @@ test:
 	cc -std=c99 -Wall -g test.c minunit.h dbg.h libcsim.h libcsim.c -o bin/test
 
 .PHONY: run-test
-run-test: csim
+run-test: test
 	./bin/test
 
 .PHONY: run

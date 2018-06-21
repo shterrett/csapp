@@ -3,6 +3,8 @@
 #include "cachelab.h"
 #include "libcsim.h"
 
+void print_help(void);
+
 int main(int argc, char** argv) {
   int verbose = 0;
   cache_config_t *config = malloc(sizeof(cache_config_t));
@@ -28,6 +30,15 @@ int main(int argc, char** argv) {
         );
   };
 
+  cache_line_t *lines = malloc(calculate_total_line_space(config));
+  void *blocks = malloc(calculate_total_block_space(config));
+  cache_t cache = initialize_cache(config, lines, blocks);
+
+  // Do work here
+  cache++;
+
+  free(lines);
+  free(blocks);
   return 0;
 }
 

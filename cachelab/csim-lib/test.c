@@ -111,7 +111,6 @@ char *test_extracts_set_bits_from_address(void) {
 
   uint64_t set_idx = extract_set_idx(config, addr);
 
-  printf("Extracted Index: 0x%08lx\n", set_idx);
   mu_assert(set_idx == 24, "extracted wrong set bits");
 
   return NULL;
@@ -145,6 +144,34 @@ char *test_extracts_tag_bits(void) {
   return NULL;
 }
 
+char *test_calculate_line_space(void) {
+  cache_config_t *config = malloc(sizeof(cache_config_t));
+  config->set_idx_bits = 32;
+  config->lines_per_set = 4;
+  config->block_bits = 16;
+
+  uint64_t line_space = calculate_total_line_space(config);
+
+  mu_assert(line_space == 17179869184 * sizeof(cache_line_t),
+            "Did not correctly calculate line_space: 2^s * E * struct size");
+
+  return NULL;
+}
+
+char *test_calculate_block_space(void) {
+  cache_config_t *config = malloc(sizeof(cache_config_t));
+  config->set_idx_bits = 32;
+  config->lines_per_set = 4;
+  config->block_bits = 16;
+
+  uint64_t block_space = calculate_total_block_space(config);
+
+  mu_assert(block_space == 17179869184 * 65536,
+            "Did not correctly calculate the block space: num_lines * 2^b");
+
+  return NULL;
+}
+
 char *all_tests(void) {
   mu_suite_start();
   mu_run_test(test_compilation);
@@ -157,6 +184,8 @@ char *all_tests(void) {
   mu_run_test(test_extracts_set_bits_from_address);
   mu_run_test(test_extracts_block_offset);
   mu_run_test(test_extracts_tag_bits);
+  mu_run_test(test_calculate_line_space);
+  mu_run_test(test_calculate_block_space);
 
   return NULL;
 }
