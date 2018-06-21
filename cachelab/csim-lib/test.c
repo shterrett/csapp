@@ -102,6 +102,9 @@ char *test_help_makes_arg_count_odd(void) {
   return NULL;
 }
 
+char *test_extracts_set_bits_from_address(void) {
+}
+
 char *all_tests(void) {
   mu_suite_start();
   mu_run_test(test_compilation);
