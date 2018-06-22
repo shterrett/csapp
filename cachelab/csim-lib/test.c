@@ -19,6 +19,8 @@ char *test_help(void) {
 
   mu_assert(help == 1, "Did not set help bit");
 
+  free(trace_file);
+  free(config);
   return NULL;
 }
 
@@ -34,6 +36,8 @@ char *test_verbose(void) {
 
   mu_assert(verbose == 1, "Did not set verbose bit");
 
+  free(trace_file);
+  free(config);
   return NULL;
 }
 
@@ -50,6 +54,8 @@ char *test_no_help_or_verbose(void) {
   mu_assert(help == 0, "Inappropriately set help bit");
   mu_assert(verbose == 0, "Inappropriately set verbose bit");
 
+  free(trace_file);
+  free(config);
   return NULL;
 }
 
@@ -69,6 +75,8 @@ char *test_initializes_variables(void) {
   mu_assert(strcmp(trace_file, "tracefile.txt") == 0, "Failed to set trace_file");
   mu_assert(required == 8, "did not count args properly");
 
+  free(trace_file);
+  free(config);
   return NULL;
 }
 
@@ -84,6 +92,8 @@ char *test_not_enough_variables(void) {
 
   mu_assert(required == 6, "did not count args properly");
 
+  free(trace_file);
+  free(config);
   return NULL;
 }
 
@@ -99,6 +109,8 @@ char *test_help_makes_arg_count_odd(void) {
 
   mu_assert(required == 9, "did not count args properly");
 
+  free(trace_file);
+  free(config);
   return NULL;
 }
 
@@ -113,6 +125,7 @@ char *test_extracts_set_bits_from_address(void) {
 
   mu_assert(set_idx == 24, "extracted wrong set bits");
 
+  free(config);
   return NULL;
 }
 
@@ -127,6 +140,7 @@ char *test_extracts_block_offset(void) {
 
   mu_assert(block_offset == 8, "extracted wrong block offset");
 
+  free(config);
   return NULL;
 }
 
@@ -141,6 +155,7 @@ char *test_extracts_tag_bits(void) {
 
   mu_assert(tag == 8, "extracted wrong tag");
 
+  free(config);
   return NULL;
 }
 
@@ -155,6 +170,7 @@ char *test_calculate_line_space(void) {
   mu_assert(line_space == 17179869184 * sizeof(cache_line_t),
             "Did not correctly calculate line_space: 2^s * E * struct size");
 
+  free(config);
   return NULL;
 }
 
@@ -169,6 +185,7 @@ char *test_calculate_block_space(void) {
   mu_assert(block_space == 17179869184 * 65536,
             "Did not correctly calculate the block space: num_lines * 2^b");
 
+  free(config);
   return NULL;
 }
 
