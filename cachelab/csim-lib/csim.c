@@ -31,14 +31,12 @@ int main(int argc, char** argv) {
   };
 
   cache_line_t *lines = malloc(calculate_total_line_space(config));
-  void *blocks = malloc(calculate_total_block_space(config));
-  cache_t cache = initialize_cache(config, lines, blocks);
+  cache_t cache = initialize_cache(config, lines);
 
   // Do work here
   cache++;
 
   free(lines);
-  free(blocks);
   return 0;
 }
 

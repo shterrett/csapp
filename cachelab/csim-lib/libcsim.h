@@ -27,13 +27,12 @@ int init(int argc,
         );
 
 uint64_t extract_set_idx(cache_config_t *config, uint64_t addr);
-uint64_t extract_block_offset(cache_config_t *config, uint64_t addr);
 uint64_t extract_tag(cache_config_t *config, uint64_t addr);
 
 uint64_t calculate_total_line_space(cache_config_t *config);
 uint64_t calculate_total_block_space(cache_config_t *config);
 
-cache_t initialize_cache(cache_config_t *config, cache_line_t *line_array, void *blocks);
+cache_t initialize_cache(cache_config_t *config, cache_line_t *line_array);
 
 typedef enum CACHE_RESULT {
   HIT,

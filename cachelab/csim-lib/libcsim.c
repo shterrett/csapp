@@ -51,19 +51,11 @@ uint64_t extract_set_idx(cache_config_t *config, uint64_t addr) {
   return (addr & tag_mask & block_mask) >> config->block_bits;
 }
 
-uint64_t extract_block_offset(cache_config_t *config, uint64_t addr) {
-  return addr & ((0x1l << config->block_bits) - 1);
-}
-
 uint64_t extract_tag(cache_config_t *config, uint64_t addr) {
   uint64_t tag_mask = build_tag_mask(config);
   uint64_t tag = (addr & tag_mask) >> (config->set_idx_bits + config->block_bits);
 
   return tag;
-}
-
-uint64_t calculate_block_size(cache_config_t *config) {
-  return 0x1l << config->block_bits;
 }
 
 uint64_t calculate_num_lines(cache_config_t *config) {
@@ -74,21 +66,14 @@ uint64_t calculate_total_line_space(cache_config_t *config) {
   return calculate_num_lines(config) * sizeof(cache_line_t);
 }
 
-uint64_t calculate_total_block_space(cache_config_t *config) {
-  return calculate_num_lines(config) * calculate_block_size(config);
-}
-
-cache_t initialize_cache(cache_config_t *config, cache_line_t *line_array, void *blocks) {
-  uint64_t block_size = calculate_block_size(config);
+cache_t initialize_cache(cache_config_t *config, cache_line_t *line_array) {
   uint64_t num_lines = calculate_num_lines(config);
   cache_line_t *current_line = line_array;
 
   for (uint64_t i = 0; i < num_lines; i++) {
-    current_line->block = blocks;
     current_line->tag = 0;
     current_line->valid = 0;
     current_line++;
-    blocks += block_size;
   }
 
   return line_array;

@@ -129,21 +129,6 @@ char *test_extracts_set_bits_from_address(void) {
   return NULL;
 }
 
-char *test_extracts_block_offset(void) {
-  uint64_t addr = 0x1111111111110008;
-  cache_config_t *config = malloc(sizeof(cache_config_t));
-  config->set_idx_bits = 32;
-  config->lines_per_set = 1;
-  config->block_bits = 16;
-
-  uint64_t block_offset = extract_block_offset(config, addr);
-
-  mu_assert(block_offset == 8, "extracted wrong block offset");
-
-  free(config);
-  return NULL;
-}
-
 char *test_extracts_tag_bits(void) {
   uint64_t addr = 0x0008111111111111;
   cache_config_t *config = malloc(sizeof(cache_config_t));
@@ -174,21 +159,6 @@ char *test_calculate_line_space(void) {
   return NULL;
 }
 
-char *test_calculate_block_space(void) {
-  cache_config_t *config = malloc(sizeof(cache_config_t));
-  config->set_idx_bits = 32;
-  config->lines_per_set = 4;
-  config->block_bits = 16;
-
-  uint64_t block_space = calculate_total_block_space(config);
-
-  mu_assert(block_space == 17179869184 * 65536,
-            "Did not correctly calculate the block space: num_lines * 2^b");
-
-  free(config);
-  return NULL;
-}
-
 char *test_accessing_cache(void) {
   cache_config_t *config = malloc(sizeof(cache_config_t));
   config->set_idx_bits = 4;
@@ -196,8 +166,7 @@ char *test_accessing_cache(void) {
   config->block_bits = 4;
 
   cache_line_t *lines = malloc(calculate_total_line_space(config));
-  void *blocks = malloc(calculate_total_block_space(config));
-  cache_t cache = initialize_cache(config, lines, blocks);
+  cache_t cache = initialize_cache(config, lines);
 
   // All in the same set, but each with a different tag
   uint64_t first_addr  = 0x0000000000000050;
@@ -239,10 +208,8 @@ char *all_tests(void) {
   mu_run_test(test_not_enough_variables);
   mu_run_test(test_help_makes_arg_count_odd);
   mu_run_test(test_extracts_set_bits_from_address);
-  mu_run_test(test_extracts_block_offset);
   mu_run_test(test_extracts_tag_bits);
   mu_run_test(test_calculate_line_space);
-  mu_run_test(test_calculate_block_space);
   mu_run_test(test_accessing_cache);
 
   return NULL;
