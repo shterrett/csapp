@@ -1,6 +1,7 @@
 #include "libcsim.h"
 
 int TRACE_FILE_NAME_LENGTH = 32;
+void promote_line(cache_line_t *first_line, cache_line_t *line, uint64_t num_lines);
 
 int init(int argc,
          char **argv,
@@ -58,8 +59,12 @@ uint64_t extract_tag(cache_config_t *config, uint64_t addr) {
   return tag;
 }
 
+uint64_t calculate_num_sets(cache_config_t *config) {
+  return (0x1l << config->set_idx_bits);
+}
+
 uint64_t calculate_num_lines(cache_config_t *config) {
-  return (0x1l << config->set_idx_bits) * config->lines_per_set;
+  return calculate_num_sets(config) * config->lines_per_set;
 }
 
 uint64_t calculate_total_line_space(cache_config_t *config) {
@@ -68,12 +73,24 @@ uint64_t calculate_total_line_space(cache_config_t *config) {
 
 cache_t initialize_cache(cache_config_t *config, cache_line_t *line_array) {
   uint64_t num_lines = calculate_num_lines(config);
+  uint64_t num_sets = calculate_num_sets(config);
   cache_line_t *current_line = line_array;
 
   for (uint64_t i = 0; i < num_lines; i++) {
-    current_line->tag = 0;
+    current_line->tag = -1;
     current_line->valid = 0;
+    current_line->prev = NULL;
+    current_line->next = NULL;
     current_line++;
+  }
+
+  for (uint64_t set_idx = 0; set_idx < num_sets; set_idx++) {
+    cache_line_t *first_line = line_array + (set_idx * config->lines_per_set);
+    cache_line_t *last_line = line_array + ((set_idx + 1) * config->lines_per_set) - 1;
+    for (cache_line_t *line = first_line; line < last_line; line++) {
+      line->next = line + 1;
+      (line + 1)->prev = line;
+    }
   }
 
   return line_array;
@@ -82,32 +99,52 @@ cache_t initialize_cache(cache_config_t *config, cache_line_t *line_array) {
 cache_result_t access_cache(cache_config_t *config, cache_t cache, uint64_t addr) {
   uint64_t set_idx = extract_set_idx(config, addr);
   uint64_t tag = extract_tag(config, addr);
-  cache_line_t *line_lb = cache + (set_idx * config->lines_per_set);
-  cache_line_t *line_ub = cache + ((set_idx + 1) * config->lines_per_set);
 
-  int valid_line_count = 0;
-  cache_line_t *first_invalid_line = NULL;
-  cache_result_t result = MISS;
+  cache_line_t *first_line = cache + (set_idx * config->lines_per_set);
+  cache_line_t *most_recent_line;
+  for (int i = 0; i < config->lines_per_set; i++) {
+    if ((first_line + i)->prev == NULL) {
+      most_recent_line = first_line + i;
+    }
+  }
 
-  for (cache_line_t *line = line_lb; line < line_ub; line++) {
-    valid_line_count += line->valid;
-    if (tag == line->tag && line->valid) {
+  cache_line_t *line = most_recent_line;
+  cache_line_t *last_line;
+  cache_result_t result = EVICTION;
+
+  while(result == EVICTION && line != NULL) {
+    if (!line->valid) {
+      result = MISS;
+      line->valid = 1;
+      line->tag = tag;
+      promote_line(most_recent_line, line, config->lines_per_set);
+    } else if (line->valid && tag == line->tag) {
       result = HIT;
-    } else if (!line->valid && first_invalid_line == NULL) {
-      first_invalid_line = line;
+      promote_line(most_recent_line, line, config->lines_per_set);
+    } else {
+      last_line = line;
+      line = line->next;
     }
   }
 
-  if (result == MISS && valid_line_count == config->lines_per_set) {
-    result = EVICTION;
-  }
-
-  if (result == MISS || result == EVICTION) {
-    if (first_invalid_line != NULL) {
-      first_invalid_line->valid = 1;
-      first_invalid_line->tag = tag;
-    }
+  if (result == EVICTION) {
+    last_line->tag = tag;
+    last_line->valid = 1;
+    promote_line(most_recent_line, last_line, config->lines_per_set);
   }
 
   return result;
+}
+
+void promote_line(cache_line_t *most_recent_line, cache_line_t *line, uint64_t num_lines) {
+  if (line == most_recent_line) {
+    return;
+  }
+  if (line->next != NULL) {
+    line->next->prev = line->prev;
+  }
+  line->prev->next = line->next;
+  line->next = most_recent_line;
+  line->prev = NULL;
+  most_recent_line->prev = line;
 }

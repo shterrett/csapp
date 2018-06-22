@@ -15,6 +15,8 @@ typedef struct CacheLine {
   uint64_t tag;
   int valid;
   void *block;
+  struct CacheLine *prev;
+  struct CacheLine *next;
 } cache_line_t;
 
 typedef cache_line_t *cache_t;
