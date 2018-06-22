@@ -86,9 +86,43 @@ cache_t initialize_cache(cache_config_t *config, cache_line_t *line_array, void 
   for (uint64_t i = 0; i < num_lines; i++) {
     current_line->block = blocks;
     current_line->tag = 0;
+    current_line->valid = 0;
     current_line++;
     blocks += block_size;
   }
 
   return line_array;
+}
+
+cache_result_t access_cache(cache_config_t *config, cache_t cache, uint64_t addr) {
+  uint64_t set_idx = extract_set_idx(config, addr);
+  uint64_t tag = extract_tag(config, addr);
+  cache_line_t *line_lb = cache + (set_idx * config->lines_per_set);
+  cache_line_t *line_ub = cache + ((set_idx + 1) * config->lines_per_set);
+
+  int valid_line_count = 0;
+  cache_line_t *first_invalid_line = NULL;
+  cache_result_t result = MISS;
+
+  for (cache_line_t *line = line_lb; line < line_ub; line++) {
+    valid_line_count += line->valid;
+    if (tag == line->tag && line->valid) {
+      result = HIT;
+    } else if (!line->valid && first_invalid_line == NULL) {
+      first_invalid_line = line;
+    }
+  }
+
+  if (result == MISS && valid_line_count == config->lines_per_set) {
+    result = EVICTION;
+  }
+
+  if (result == MISS || result == EVICTION) {
+    if (first_invalid_line != NULL) {
+      first_invalid_line->valid = 1;
+      first_invalid_line->tag = tag;
+    }
+  }
+
+  return result;
 }

@@ -189,6 +189,46 @@ char *test_calculate_block_space(void) {
   return NULL;
 }
 
+char *test_accessing_cache(void) {
+  cache_config_t *config = malloc(sizeof(cache_config_t));
+  config->set_idx_bits = 4;
+  config->lines_per_set = 4;
+  config->block_bits = 4;
+
+  cache_line_t *lines = malloc(calculate_total_line_space(config));
+  void *blocks = malloc(calculate_total_block_space(config));
+  cache_t cache = initialize_cache(config, lines, blocks);
+
+  // All in the same set, but each with a different tag
+  uint64_t first_addr  = 0x0000000000000050;
+  uint64_t second_addr = 0x0000000000000150;
+  uint64_t third_addr  = 0x0000000000000250;
+  uint64_t fourth_addr = 0x0000000000000350;
+  uint64_t fifth_addr  = 0x0000000000000450;
+
+  cache_result_t first_miss = access_cache(config, cache, first_addr);
+  cache_result_t first_hit = access_cache(config, cache, first_addr);
+  cache_result_t second_miss = access_cache(config, cache, second_addr);
+  cache_result_t second_hit = access_cache(config, cache, second_addr);
+  cache_result_t third_miss = access_cache(config, cache, third_addr);
+  cache_result_t third_hit = access_cache(config, cache, third_addr);
+  cache_result_t fourth_miss = access_cache(config, cache, fourth_addr);
+  cache_result_t fourth_hit = access_cache(config, cache, fourth_addr);
+  cache_result_t fifth_eviction = access_cache(config, cache, fifth_addr);
+
+  mu_assert(first_miss == MISS, "Did not miss first addr");
+  mu_assert(first_hit == HIT, "Did not hit first addr");
+  mu_assert(second_miss == MISS, "Did not miss second addr");
+  mu_assert(second_hit == HIT, "Did not hit second addr");
+  mu_assert(third_miss == MISS, "Did not miss third addr");
+  mu_assert(third_hit == HIT, "Did not hit third addr");
+  mu_assert(fourth_miss == MISS, "Did not miss fourth addr");
+  mu_assert(fourth_hit == HIT, "Did not hit fourth addr");
+  mu_assert(fifth_eviction == EVICTION, "Did not evict fifth addr");
+
+  return NULL;
+}
+
 char *all_tests(void) {
   mu_suite_start();
   mu_run_test(test_compilation);
@@ -203,6 +243,7 @@ char *all_tests(void) {
   mu_run_test(test_extracts_tag_bits);
   mu_run_test(test_calculate_line_space);
   mu_run_test(test_calculate_block_space);
+  mu_run_test(test_accessing_cache);
 
   return NULL;
 }

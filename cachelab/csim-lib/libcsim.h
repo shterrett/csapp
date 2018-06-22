@@ -13,6 +13,7 @@ typedef struct CacheConfig {
 
 typedef struct CacheLine {
   uint64_t tag;
+  int valid;
   void *block;
 } cache_line_t;
 
@@ -33,3 +34,11 @@ uint64_t calculate_total_line_space(cache_config_t *config);
 uint64_t calculate_total_block_space(cache_config_t *config);
 
 cache_t initialize_cache(cache_config_t *config, cache_line_t *line_array, void *blocks);
+
+typedef enum CACHE_RESULT {
+  HIT,
+  MISS,
+  EVICTION
+} cache_result_t;
+
+cache_result_t access_cache(cache_config_t *config, cache_t cache, uint64_t addr);
