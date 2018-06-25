@@ -148,3 +148,25 @@ void promote_line(cache_line_t *most_recent_line, cache_line_t *line, uint64_t n
   line->prev = NULL;
   most_recent_line->prev = line;
 }
+
+void parse_line(char *line_str, line_t* line) {
+  uint64_t addr = 0;
+  char cmd = '\0';
+
+  if (isspace(*line_str)) {
+    sscanf(line_str, " %c %lx", &cmd, &addr);
+  } else {
+    sscanf(line_str, "%c %lx", &cmd, &addr);
+  }
+
+  line->addr = addr;
+  if (cmd == 'I') {
+    line->command = INSTR;
+  } else if (cmd == 'L') {
+    line->command = LOAD;
+  } else if (cmd == 'M') {
+    line->command = MODIFY;
+  } else if (cmd == 'S') {
+    line->command = STORE;
+  }
+}

@@ -252,6 +252,33 @@ char *test_eviction_policy(void) {
   return NULL;
 }
 
+char *test_reads_line_returns_cache_command(void) {
+  char *instr = "I 0400d7d4,8";
+  char *modify = " M 0421c7f0,4";
+  char *load = " L 04f6b868,8";
+  char *store = " S 7ff0005c8,8";
+
+  line_t *instr_line = malloc(sizeof(line_t));
+  parse_line(instr, instr_line);
+  line_t *modify_line = malloc(sizeof(line_t));
+  parse_line(modify, modify_line);
+  line_t *load_line = malloc(sizeof(line_t));
+  parse_line(load, load_line);
+  line_t *store_line = malloc(sizeof(line_t));
+  parse_line(store, store_line);
+
+  mu_assert(instr_line->command == INSTR, "wrong command for instruction");
+  mu_assert(instr_line->addr == 0x0400d7d4, "wrong addr for instruction");
+  mu_assert(modify_line->command == MODIFY, "wrong command for modify");
+  mu_assert(modify_line->addr == 0x0421c7f0, "wrong addr for modify");
+  mu_assert(load_line->command == LOAD, "wrong command for load");
+  mu_assert(load_line->addr == 0x04f6b868, "wrong addr for load");
+  mu_assert(store_line->command == STORE, "wrong command for store");
+  mu_assert(store_line->addr == 0x7ff0005c8, "wrong addr for store");
+
+  return NULL;
+}
+
 char *all_tests(void) {
   mu_suite_start();
   mu_run_test(test_compilation);
@@ -266,6 +293,7 @@ char *all_tests(void) {
   mu_run_test(test_calculate_line_space);
   mu_run_test(test_accessing_cache);
   mu_run_test(test_eviction_policy);
+  mu_run_test(test_reads_line_returns_cache_command);
 
   return NULL;
 }

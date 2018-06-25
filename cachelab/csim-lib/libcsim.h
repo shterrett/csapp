@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <ctype.h>
 
 int TRACE_FILE_NAME_LENGTH;
 
@@ -43,3 +44,17 @@ typedef enum CACHE_RESULT {
 } cache_result_t;
 
 cache_result_t access_cache(cache_config_t *config, cache_t cache, uint64_t addr);
+
+typedef enum CACHE_COMMAND {
+  INSTR,
+  LOAD,
+  STORE,
+  MODIFY
+} cache_command_t;
+
+typedef struct LINE {
+  uint64_t addr;
+  cache_command_t command;
+} line_t;
+
+void parse_line(char *line_str, line_t* line);
