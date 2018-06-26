@@ -58,3 +58,11 @@ typedef struct LINE {
 } line_t;
 
 void parse_line(char *line_str, line_t* line);
+
+typedef struct COUNTER {
+  size_t hits;
+  size_t misses;
+  size_t evictions;
+} counter_t;
+
+void simulate_cache_access(cache_config_t *contig, cache_t cache, line_t *line, counter_t *counter);

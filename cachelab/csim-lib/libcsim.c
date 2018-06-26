@@ -170,3 +170,37 @@ void parse_line(char *line_str, line_t* line) {
     line->command = STORE;
   }
 }
+
+void simulate_cache_access(cache_config_t *config, cache_t cache, line_t *line, counter_t *counter) {
+  cache_result_t result;
+
+  switch (line->command) {
+    case INSTR:
+      break;
+    case LOAD:
+    case STORE:
+      result = access_cache(config, cache, line->addr);
+      break;
+    case MODIFY:
+      line->command = LOAD;
+      simulate_cache_access(config, cache, line, counter);
+      line->command = STORE;
+      simulate_cache_access(config, cache, line, counter);
+      line->command = MODIFY;
+      break;
+  }
+
+  switch (result) {
+    case HIT:
+      counter->hits += 1;
+      break;
+    case MISS:
+      counter->misses += 1;
+      break;
+    case EVICTION:
+      counter->evictions += 1;
+      break;
+    default:
+      break;
+  }
+}

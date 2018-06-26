@@ -1,11 +1,13 @@
-#include <stdlib.h>
-#include <stdio.h>
 #include "cachelab.h"
 #include "libcsim.h"
 
 void print_help(void);
+void simulate_cache(cache_config_t *config, cache_t cache, char *trace_file, int verbose);
 
 int main(int argc, char** argv) {
+
+  printf("_POSIX_C_SOURCE %ld\n", _POSIX_C_SOURCE);
+
   int verbose = 0;
   cache_config_t *config = malloc(sizeof(cache_config_t));
   char* trace_file = malloc(sizeof(char) * TRACE_FILE_NAME_LENGTH);
@@ -33,8 +35,7 @@ int main(int argc, char** argv) {
   cache_line_t *lines = malloc(calculate_total_line_space(config));
   cache_t cache = initialize_cache(config, lines);
 
-  // Do work here
-  cache++;
+  simulate_cache(config, cache, trace_file, verbose);
 
   free(lines);
   return 0;
@@ -57,4 +58,26 @@ void print_help(void) {
 
   printf("%s", help);
   exit(0);
+}
+
+void simulate_cache(cache_config_t *config, cache_t cache, char *trace_file, int verbose) {
+  FILE *fp = fopen(trace_file, "r");
+  size_t read = 0;
+  char *line_str = NULL;
+  size_t len = 0;
+  line_t *line = malloc(sizeof(line_t));
+  counter_t *counter = malloc(sizeof(counter));
+  counter->hits = 0;
+  counter->misses = 0;
+  counter->evictions = 0;
+
+  while ((read = getline(&line_str, &len, fp)) != -1) {
+    parse_line(line_str, line);
+    simulate_cache_access(config, cache, line, counter);
+    // handle verbose logging
+  }
+
+  printSummary(counter->hits, counter->misses, counter->evictions);
+  free(counter);
+  free(line);
 }

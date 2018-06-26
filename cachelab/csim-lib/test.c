@@ -276,6 +276,69 @@ char *test_reads_line_returns_cache_command(void) {
   mu_assert(store_line->command == STORE, "wrong command for store");
   mu_assert(store_line->addr == 0x7ff0005c8, "wrong addr for store");
 
+  free(instr_line);
+  free(modify_line);
+  free(load_line);
+  free(store_line);
+
+  return NULL;
+}
+
+char *test_simulate_cache_access(void) {
+  cache_config_t *config = malloc(sizeof(cache_config_t));
+  config->set_idx_bits = 4;
+  config->lines_per_set = 4;
+  config->block_bits = 4;
+
+  cache_line_t *lines = malloc(calculate_total_line_space(config));
+  cache_t cache = initialize_cache(config, lines);
+
+  counter_t *counter = malloc(sizeof(counter));
+  counter->hits = 0;
+  counter->misses = 0;
+  counter->evictions = 0;
+
+  char *instr = "I 0400d7d4,8";
+  char *modify = " M 0421c7f0,4";
+  char *load = " L 04f6b868,8";
+  char *store = " S 7ff0005c8,8";
+
+  line_t *instr_line = malloc(sizeof(line_t));
+  parse_line(instr, instr_line);
+  line_t *modify_line = malloc(sizeof(line_t));
+  parse_line(modify, modify_line);
+  line_t *load_line = malloc(sizeof(line_t));
+  parse_line(load, load_line);
+  line_t *store_line = malloc(sizeof(line_t));
+  parse_line(store, store_line);
+
+  simulate_cache_access(config, cache, instr_line, counter);
+  mu_assert(counter->hits == 0, "Instruction added a hit");
+  mu_assert(counter->misses == 0, "Instruction added a miss");
+  mu_assert(counter->evictions == 0, "Instruction added an eviction");
+
+  simulate_cache_access(config, cache, modify_line, counter);
+  mu_assert(counter->hits == 1, "First modify hits on second invocation");
+  mu_assert(counter->misses == 1, "First modify misses on first invocation");
+  mu_assert(counter->evictions == 0, "Don't need to evict yet");
+
+  simulate_cache_access(config, cache, load_line, counter);
+  mu_assert(counter->hits == 1, "Load does not hit");
+  mu_assert(counter->misses == 2, "Load misses");
+  mu_assert(counter->evictions == 0, "Load does not evict");
+
+  simulate_cache_access(config, cache, store_line, counter);
+  mu_assert(counter->hits == 1, "Store does not hit");
+  mu_assert(counter->misses == 3, "Store misses");
+  mu_assert(counter->evictions == 0, "Store does not evict");
+
+  free(instr_line);
+  free(modify_line);
+  free(load_line);
+  free(store_line);
+  free(config);
+  free(lines);
+
   return NULL;
 }
 
@@ -294,6 +357,7 @@ char *all_tests(void) {
   mu_run_test(test_accessing_cache);
   mu_run_test(test_eviction_policy);
   mu_run_test(test_reads_line_returns_cache_command);
+  mu_run_test(test_simulate_cache_access);
 
   return NULL;
 }
