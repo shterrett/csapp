@@ -312,24 +312,35 @@ char *test_simulate_cache_access(void) {
   line_t *store_line = malloc(sizeof(line_t));
   parse_line(store, store_line);
 
-  simulate_cache_access(config, cache, instr_line, counter);
+  cache_result_t result;
+
+  result = simulate_cache_access(config, cache, instr_line, counter);
   mu_assert(counter->hits == 0, "Instruction added a hit");
   mu_assert(counter->misses == 0, "Instruction added a miss");
   mu_assert(counter->evictions == 0, "Instruction added an eviction");
 
-  simulate_cache_access(config, cache, modify_line, counter);
+  result = simulate_cache_access(config, cache, modify_line, counter);
+  mu_assert(result == MISS, "Should miss");
   mu_assert(counter->hits == 1, "First modify hits on second invocation");
   mu_assert(counter->misses == 1, "First modify misses on first invocation");
   mu_assert(counter->evictions == 0, "Don't need to evict yet");
 
-  simulate_cache_access(config, cache, load_line, counter);
+  result = simulate_cache_access(config, cache, load_line, counter);
+  mu_assert(result == MISS, "Should miss");
   mu_assert(counter->hits == 1, "Load does not hit");
   mu_assert(counter->misses == 2, "Load misses");
   mu_assert(counter->evictions == 0, "Load does not evict");
 
-  simulate_cache_access(config, cache, store_line, counter);
+  result = simulate_cache_access(config, cache, store_line, counter);
+  mu_assert(result == MISS, "Should miss");
   mu_assert(counter->hits == 1, "Store does not hit");
   mu_assert(counter->misses == 3, "Store misses");
+  mu_assert(counter->evictions == 0, "Store does not evict");
+
+  result = simulate_cache_access(config, cache, store_line, counter);
+  mu_assert(result == HIT, "Should hit");
+  mu_assert(counter->hits == 2, "Store should hit");
+  mu_assert(counter->misses == 3, "Store does not miss this time");
   mu_assert(counter->evictions == 0, "Store does not evict");
 
   free(instr_line);

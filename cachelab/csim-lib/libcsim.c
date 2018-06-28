@@ -171,8 +171,9 @@ void parse_line(char *line_str, line_t* line) {
   }
 }
 
-void simulate_cache_access(cache_config_t *config, cache_t cache, line_t *line, counter_t *counter) {
+cache_result_t simulate_cache_access(cache_config_t *config, cache_t cache, line_t *line, counter_t *counter) {
   cache_result_t result;
+  cache_result_t modify_result; // counted in sub-calls
 
   switch (line->command) {
     case INSTR:
@@ -183,8 +184,9 @@ void simulate_cache_access(cache_config_t *config, cache_t cache, line_t *line, 
       break;
     case MODIFY:
       line->command = LOAD;
-      simulate_cache_access(config, cache, line, counter);
+      modify_result = simulate_cache_access(config, cache, line, counter);
       line->command = STORE;
+      // modify will always end with a hit
       simulate_cache_access(config, cache, line, counter);
       line->command = MODIFY;
       break;
@@ -202,5 +204,11 @@ void simulate_cache_access(cache_config_t *config, cache_t cache, line_t *line, 
       break;
     default:
       break;
+  }
+
+  if (line->command == MODIFY) {
+    return modify_result;
+  } else {
+    return result;
   }
 }

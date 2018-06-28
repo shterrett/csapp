@@ -3,6 +3,7 @@
 
 void print_help(void);
 void simulate_cache(cache_config_t *config, cache_t cache, char *trace_file, int verbose);
+void verbose_log(line_t *line, cache_result_t result);
 
 int main(int argc, char** argv) {
 
@@ -73,11 +74,52 @@ void simulate_cache(cache_config_t *config, cache_t cache, char *trace_file, int
 
   while ((read = getline(&line_str, &len, fp)) != -1) {
     parse_line(line_str, line);
-    simulate_cache_access(config, cache, line, counter);
-    // handle verbose logging
+    cache_result_t result = simulate_cache_access(config, cache, line, counter);
+
+    if (verbose) {
+      verbose_log(line, result);
+    }
   }
 
   printSummary(counter->hits, counter->misses, counter->evictions);
   free(counter);
   free(line);
+}
+
+void verbose_log(line_t *line, cache_result_t result) {
+  switch (line->command) {
+    case INSTR:
+      break;
+    case LOAD:
+      printf("L: ");
+      break;
+    case STORE:
+      printf("S: ");
+      break;
+    case MODIFY:
+      printf("M: ");
+      break;
+    default:
+      return;
+  }
+
+  printf("0x%016lx ", line->addr);
+
+  switch(result) {
+    case HIT:
+      printf("hit");
+      break;
+    case MISS:
+      printf("miss");
+      break;
+    case EVICTION:
+      printf("miss, evict");
+      break;
+    default:
+      break;
+  }
+
+  if (line->command == MODIFY) {
+    printf(", hit");
+  }
 }

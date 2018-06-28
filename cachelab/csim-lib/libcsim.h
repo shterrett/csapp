@@ -65,4 +65,4 @@ typedef struct COUNTER {
   size_t evictions;
 } counter_t;
 
-void simulate_cache_access(cache_config_t *contig, cache_t cache, line_t *line, counter_t *counter);
+cache_result_t simulate_cache_access(cache_config_t *contig, cache_t cache, line_t *line, counter_t *counter);
